@@ -1,0 +1,20 @@
+{
+  "name": "techroom",
+  "version": "1.0.0",
+  "description": "Welcome to **TechRoom**, where we're reshaping the future of education with our innovative online classroom platform. TechRoom offers a comprehensive virtual learning environment, integrating an online meeting platform with a vibrant community for teachers and students. Whether you're engaging in real-time lessons or challenging a peer in DSA puzzles, TechRoom is your go-to educational hub.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Harshal17S/TechRoom.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Harshal17S/TechRoom/issues"
+  },
+  "homepage": "https://github.com/Harshal17S/TechRoom#readme"
+}
