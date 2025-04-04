@@ -1,8 +1,7 @@
 import { students, type Student, type InsertStudent } from "@shared/schema";
 import { users, type User, type InsertUser } from "@shared/schema";
-
-// modify the interface with any CRUD methods
-// you might need
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -17,75 +16,52 @@ export interface IStorage {
   updateStudentId(id: number, studentId: string): Promise<Student | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private students: Map<number, Student>;
-  currentUserId: number;
-  currentStudentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.students = new Map();
-    this.currentUserId = 1;
-    this.currentStudentId = 1;
-    
-    // Initialize with a default student
-    this.createStudent({
-      name: "John Doe",
-      studentId: "S12345678",
-      email: "john.doe@university.edu",
-      department: "Computer Science"
-    });
-  }
-
+export class DatabaseStorage implements IStorage {
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   // Student methods
   async getStudent(id: number): Promise<Student | undefined> {
-    return this.students.get(id);
+    const [student] = await db.select().from(students).where(eq(students.id, id));
+    return student || undefined;
   }
 
   async getStudentByStudentId(studentId: string): Promise<Student | undefined> {
-    return Array.from(this.students.values()).find(
-      (student) => student.studentId === studentId
-    );
+    const [student] = await db.select().from(students).where(eq(students.studentId, studentId));
+    return student || undefined;
   }
 
   async getAllStudents(): Promise<Student[]> {
-    return Array.from(this.students.values());
+    return await db.select().from(students);
   }
 
   async createStudent(insertStudent: InsertStudent): Promise<Student> {
-    const id = this.currentStudentId++;
-    const student: Student = { ...insertStudent, id };
-    this.students.set(id, student);
+    const [student] = await db.insert(students).values(insertStudent).returning();
     return student;
   }
 
   async updateStudentId(id: number, studentId: string): Promise<Student | undefined> {
-    const student = this.students.get(id);
-    if (!student) return undefined;
-
-    const updatedStudent = { ...student, studentId };
-    this.students.set(id, updatedStudent);
-    return updatedStudent;
+    const [updatedStudent] = await db
+      .update(students)
+      .set({ studentId })
+      .where(eq(students.id, id))
+      .returning();
+    
+    return updatedStudent || undefined;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
